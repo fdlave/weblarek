@@ -98,3 +98,122 @@ Presenter - презентер содержит основную логику п
 `emit<T extends object>(event: string, data?: T): void` - инициализация события. При вызове события в метод передается название события и объект с данными, который будет использован как аргумент для вызова обработчика.  
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие с передачей в него данных из второго параметра.
 
+## Данные
+
+### Интерфейсы данных
+IProduct - описывает структуру данных товара для отображения в каталоге и работы с корзиной:
+
+```
+interface IProduct {
+    id: string;
+    description: string;
+    image: string;
+    title: string;
+    category: string;
+    price: number | null;
+}
+```
+
+IBuyer - описывает контактные данные покупателя для оформления заказа:
+
+```
+interface IBuyer {
+    payment: TPayment;
+    email: string;
+    phone: string;
+    address: string;
+}
+```
+
+IOrder - описывает данные для отправки заказа:
+
+```
+interface IOrder {
+    payment: TPayment;
+    email: string;
+    phone: string;
+    address: string;
+    total: number;
+    items: string[];
+}
+```
+
+## Модели данных
+
+### Класс ProductList 
+
+Модель для хранения каталога товаров. Назначение: Хранение массива товаров и управление выбранным товаром для просмотра.
+
+Конструктор класса не принимает параметров.
+
+Поля класса: 
+
+`private products: IProduct[]` - массив всех товаров.
+`private selectedProduct: IProduct | null` - выбранный товар для детального просмотра.
+
+Методы класса: 
+
+`setProducts(products: IProduct[]): void` - сохранение массива товаров.
+`getProducts(): IProduct[]` - получение всех товаров.
+`getProductById(id: string): IProduct | undefined` - получение товара по ID.
+`setSelectedProduct(product: IProduct): void` - сохранение выбранного товара.
+`getSelectedProduct(): IProduct | null` - получение выбранного товара.
+
+### Класс Basket
+
+Модель для хранения корзины покупок. Назначение: Управление товарами в корзине, подсчет стоимости и количества.
+
+Конструктор класса не принимает параметров.
+
+Поля класса: 
+
+`private items: IProduct[]` - товары в корзине.
+
+Методы класса: 
+
+`getItems(): IProduct[]` - получение товаров в корзине.
+`addItem(product: IProduct): void` - добавление товара в корзину.
+`removeItem(productId: string): void` - удаление товара из корзины.
+`clear(): void` - очистка корзины.
+`getTotalPrice(): number` - получение общей стоимости.
+`getItemsCount(): number` - получение количества товаров.
+`hasItem(productId: string): boolean` - проверка наличия товара в корзине.
+
+### Класс Buyer
+
+Модель для хранения данных покупателя. Назначение: Хранение и валидация данных покупателя при оформлении заказа.
+
+Конструктор класса не принимает параметров.
+
+Поля класса: 
+
+`private payment: TPayment | null` - способ оплаты.
+`private email: string` - email покупателя.
+`private phone: string` - телефон покупателя.
+`private address: string` - адрес доставки.
+
+Методы класса: 
+
+`setData(data: Partial<IBuyer>): void` - сохранение данных.
+`getData(): IBuyer` - получение всех данных покупателя.
+`clear(): void` - очистка данных покупателя.
+`validate(): IBuyerValidation` - валидация данных.
+`isValid(): boolean` - проверка валидности всех данных.
+
+
+#### Слой коммуникации
+
+### Класс LarekApi
+
+Класс для связи приложения с сервером API. Назначение: Выполнение запросов к серверу для получения товаров и отправки заказов.
+
+`constructor(private baseApi: IApi)` - принимает объект, реализующий интерфейс IApi.
+
+Методы класса: 
+
+`getProductList(): Promise<IProduct[]>` - получение каталога товаров с сервера.
+`createOrder(order: IOrder): Promise<IOrderResult>` - отправка заказа на сервер.
+
+
+
+
