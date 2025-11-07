@@ -1,11 +1,15 @@
-import { IProduct } from '../../types';
+import { IProduct } from "../../types";
+import { IEvents } from "../base/Events";
 
-export class ProductList {
+export class ProductsModel {
   private products: IProduct[] = [];
   private selectedProduct: IProduct | null = null;
 
+  constructor(private events: IEvents) {}
+
   setProducts(products: IProduct[]): void {
     this.products = products;
+    this.events.emit("products:changed", this.products);
   }
 
   getProducts(): IProduct[] {
@@ -13,11 +17,12 @@ export class ProductList {
   }
 
   getProductById(id: string): IProduct | undefined {
-    return this.products.find(product => product.id === id);
+    return this.products.find((product) => product.id === id);
   }
 
   setSelectedProduct(product: IProduct): void {
     this.selectedProduct = product;
+    this.events.emit("product:selected", product);
   }
 
   getSelectedProduct(): IProduct | null {
