@@ -13,8 +13,6 @@ export class Modal extends Component<IModalData> {
   constructor(container: HTMLElement, protected events: IEvents) {
     super(container);
 
-    this.container.style.overflowY = 'auto';
-
     this.closeButton = ensureElement<HTMLButtonElement>(
       ".modal__close",
       container
@@ -36,12 +34,10 @@ export class Modal extends Component<IModalData> {
 
   open(): void {
     this.container.classList.add("modal_active");
-    document.body.style.overflow = 'hidden';
   }
 
   close(): void {
     this.container.classList.remove("modal_active");
-    document.body.style.overflow = 'auto';
   }
 
   set content(content: HTMLElement) {

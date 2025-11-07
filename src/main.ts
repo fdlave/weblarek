@@ -123,7 +123,9 @@ events.on("basket:add", (data: { id: string }) => {
   if (product) {
     basketModel.addItem(product);
     document.querySelector(".card__button")!.textContent = "Удалить из корзины";
+    modal.close();
   }
+  
 });
 
 events.on("basket:order", () => {
@@ -146,6 +148,7 @@ events.on("basket:changed", () => {
 
 events.on("basket:remove", (data: { id: string }) => {
   basketModel.removeItem(data.id);
+  modal.close();
 });
 
 events.on("payment:changed", (data: { payment: "card" | "cash" }) => {
