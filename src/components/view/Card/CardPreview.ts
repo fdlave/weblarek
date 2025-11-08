@@ -31,8 +31,7 @@ export class PreviewCard extends Card<ICardData> {
   }
 
   set image(value: string) {
-    this.imageEl.src = `${CDN_URL}/${value}`;
-    this.imageEl.alt = this.titleCard.textContent || "";
+    this.setImage(this.imageEl, `${CDN_URL}/${value}`, this.titleCard.textContent || '');
   }
 
   set category(value: string) {
@@ -54,6 +53,16 @@ export class PreviewCard extends Card<ICardData> {
 
   set buttonDisabled(value: boolean) {
     this.buttonEl.disabled = value;
+  }
+
+  updateButtonState(inBasket: boolean): void {
+    if (this.buttonEl.disabled) return;
+    
+    if (inBasket) {
+      this.buttonEl.textContent = "Удалить из корзины";
+    } else {
+      this.buttonEl.textContent = "В корзину";
+    }
   }
 
   render(data: ICardData): HTMLElement {

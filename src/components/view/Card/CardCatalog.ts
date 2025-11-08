@@ -20,8 +20,7 @@ export class CardCatalog extends Card<ICardData> {
   }
 
   set image(value: string) {
-    this.imageEl.src = `${CDN_URL}/${value}`;
-    this.imageEl.alt = this.titleCard.textContent;
+    this.setImage(this.imageEl, `${CDN_URL}/${value}`, this.titleCard.textContent || '');
   }
 
   set category(value: string) {

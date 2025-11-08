@@ -23,6 +23,7 @@ import { Success } from "./components/view/Success";
 const events = new EventEmitter();
 const api = new Api(API_URL);
 const webLarek = new LarekApi(api);
+let currentPreviewCard: PreviewCard | null = null;
 
 const productsModel = new ProductsModel(events);
 const basketModel = new BasketModel(events);
@@ -49,10 +50,10 @@ const basketElement = cloneTemplate<HTMLElement>(basketTemplate);
 const basketView = new Basket(basketElement, events);
 
 const orderElement = cloneTemplate<HTMLElement>(orderTemplate);
-const orderForm = new FormOrder(orderElement, events);
+const orderForm = new FormOrder(orderElement, events, buyerModel);
 
 const contactsElement = cloneTemplate<HTMLElement>(contactsTemplate);
-const contactsForm = new FormContacts(contactsElement, events);
+const contactsForm = new FormContacts(contactsElement, events, buyerModel);
 
 const successElement = cloneTemplate<HTMLElement>(successTemplate);
 const successView = new Success(successElement, events);
@@ -86,7 +87,7 @@ events.on("product:select", (data: { id: string }) => {
     productsModel.setSelectedProduct(product);
 
     const previewElement = cloneTemplate<HTMLElement>(cardPreviewTemplate);
-    const previewCard = new PreviewCard(previewElement, events);
+    currentPreviewCard = new PreviewCard(previewElement, events);
 
     const inBasket = basketModel.hasItem(product.id);
     let buttonText = "В корзину";
@@ -99,7 +100,7 @@ events.on("product:select", (data: { id: string }) => {
       buttonText = "Удалить из корзины";
     }
 
-    previewCard.render({
+    currentPreviewCard.render({
       ...product,
       buttonText,
       buttonDisabled,
@@ -122,14 +123,16 @@ events.on("basket:add", (data: { id: string }) => {
   const product = productsModel.getProductById(data.id);
   if (product) {
     basketModel.addItem(product);
-    document.querySelector(".card__button")!.textContent = "Удалить из корзины";
     modal.close();
   }
-  
 });
 
 events.on("basket:order", () => {
-  modal.content = orderForm.render({ payment: undefined, address: "" });
+  const buyerData = buyerModel.getData();
+  modal.content = orderForm.render({ 
+    payment: buyerData.payment, 
+    address: buyerData.address || "" 
+  });
   modal.open();
 });
 
@@ -144,11 +147,18 @@ events.on("basket:changed", () => {
 
   basketView.totalPrice = basketModel.getTotalPrice();
   basketView.buttonDisabled = items.length === 0;
+
+  if (currentPreviewCard) {
+    const selectedProduct = productsModel.getSelectedProduct();
+    if (selectedProduct) {
+      const inBasket = basketModel.hasItem(selectedProduct.id);
+      currentPreviewCard.updateButtonState(inBasket);
+    }
+  }
 });
 
 events.on("basket:remove", (data: { id: string }) => {
   basketModel.removeItem(data.id);
-  modal.close();
 });
 
 events.on("payment:changed", (data: { payment: "card" | "cash" }) => {

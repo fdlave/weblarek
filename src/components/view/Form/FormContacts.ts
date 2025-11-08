@@ -1,6 +1,7 @@
 import { Form, IFormData } from "./Form";
 import { ensureElement } from "../../../utils/utils";
 import { IEvents } from "../../base/Events";
+import { BuyerModel } from "../../models/Buyer";
 
 interface IContactsData extends IFormData {
   email: string;
@@ -11,7 +12,7 @@ export class FormContacts extends Form<IContactsData> {
   protected emailInput: HTMLInputElement;
   protected phoneInput: HTMLInputElement;
 
-  constructor(container: HTMLElement, protected events: IEvents) {
+  constructor(container: HTMLElement, protected events: IEvents, private buyerModel: BuyerModel) {
     super(container, events);
 
     this.emailInput = ensureElement<HTMLInputElement>(
@@ -40,15 +41,14 @@ export class FormContacts extends Form<IContactsData> {
   }
 
   private validateForm(): void {
-    const hasEmail = this.emailInput.value.trim() !== "";
-    const hasPhone = this.phoneInput.value.trim() !== "";
+    const validationErrors = this.buyerModel.validate();
+  
+    const formErrors: Record<string, string> = {};
+    if (validationErrors.email) formErrors.email = validationErrors.email;
+    if (validationErrors.phone) formErrors.phone = validationErrors.phone;
 
-    const errors: Record<string, string> = {};
-    if (!hasEmail) errors.email = "Введите email";
-    if (!hasPhone) errors.phone = "Введите телефон";
-
-    this.errors = errors;
-    this.valid = hasEmail && hasPhone;
+    this.errors = formErrors;
+    this.valid = !formErrors.email && !formErrors.phone;
   }
 
   set email(value: string) {

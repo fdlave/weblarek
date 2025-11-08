@@ -2,6 +2,7 @@ import { Form, IFormData } from "./Form";
 import { ensureElement } from "../../../utils/utils";
 import { IEvents } from "../../base/Events";
 import { TPayment } from "../../../types";
+import { BuyerModel } from "../../models/Buyer";
 
 interface IOrderData extends IFormData {
   payment: TPayment;
@@ -13,7 +14,7 @@ export class FormOrder extends Form<IOrderData> {
   protected cashButton: HTMLButtonElement;
   protected addressInput: HTMLInputElement;
 
-  constructor(container: HTMLElement, protected events: IEvents) {
+  constructor(container: HTMLElement, protected events: IEvents, private buyerModel: BuyerModel) {
     super(container, events);
 
     this.cardButton = ensureElement<HTMLButtonElement>(
@@ -60,17 +61,14 @@ export class FormOrder extends Form<IOrderData> {
   }
 
   private validateForm(): void {
-    const hasPayment =
-      this.cardButton.classList.contains("button_alt-active") ||
-      this.cashButton.classList.contains("button_alt-active");
-    const hasAddress = this.addressInput.value.trim() !== "";
+    const validationErrors = this.buyerModel.validate();
+  
+    const formErrors: Record<string, string> = {};
+    if (validationErrors.payment) formErrors.payment = validationErrors.payment;
+    if (validationErrors.address) formErrors.address = validationErrors.address;
 
-    const errors: Record<string, string> = {};
-    if (!hasPayment) errors.payment = "Выберите способ оплаты";
-    if (!hasAddress) errors.address = "Необходимо указать адрес";
-
-    this.errors = errors;
-    this.valid = hasPayment && hasAddress;
+    this.errors = formErrors;
+    this.valid = !formErrors.payment && !formErrors.address;
   }
 
   private toggleButtonActive(button: HTMLButtonElement, isActive: boolean) {
